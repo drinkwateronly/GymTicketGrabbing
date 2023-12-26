@@ -18,6 +18,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -173,7 +174,12 @@ func AddOrderWorker(basicInfo BasicInfo, logOutput *widget.Entry) {
 	logOutput.Append(NewTextWithPrefix("当前空闲场次数量:" + strconv.Itoa(len(openRooms))))
 	logOutput.Append(NewTextWithPrefix("开始预约"))
 	// 随机从空闲场地随机选择一个场地
-	randIndex := rand.Intn(len(openRooms) - 1)
+	var randIndex int
+	if len(openRooms)-1 == 0 {
+		randIndex = 0
+	} else {
+		randIndex = rand.Intn(len(openRooms) - 1) // Intn的输入小于等于0时panic
+	}
 	WID := openRooms[randIndex][0]
 	// 根据场地下单
 	err = AddOrderByInfo(name, id, phone, cookie, date, beginHour, endHour, WID)
@@ -191,13 +197,29 @@ func NewTextWithPrefix(s string) string {
 	return "\n" + time.Now().Format("15:04:05") + "> " + s
 }
 
+// isValidDateFormat 验证日期格式
+func isValidDateFormat(date string) bool {
+	// 该例子中假设日期格式为YYYY-MM-DD
+	dateRegex := `^\d{4}-\d{2}-\d{2}$`
+	// 编译正则表达式
+	regex, err := regexp.Compile(dateRegex)
+	if err != nil {
+		fmt.Println("正则表达式编译错误:", err)
+		return false
+	}
+	// 使用正则表达式匹配字符串
+	match := regex.MatchString(date)
+
+	return match
+}
+
 // BasicInfo 描述了下单所需的基本信息
 type BasicInfo struct {
 	name      string // 姓名
 	id        string // 学生卡id
 	phone     string // 手机号
 	cookie    string //
-	date      string // 格式 20xx-xx-xx
+	date      string // 格式 YYYY-MM-DD
 	beginHour string // 预约时间段开始
 	endHour   string // 预约时间段结束
 	sport     string // 运动场馆类型
@@ -219,17 +241,17 @@ func main() {
 	// logContent
 	logOutput := &widget.Entry{
 		MultiLine: true,                         // 多行
-		Wrapping:  fyne.TextWrapWord,            //
+		Wrapping:  fyne.TextWrapOff,             //
 		Scroll:    container.ScrollVerticalOnly, // 只允许垂直华东
 		TextStyle: fyne.TextStyle{ // 文本的格式，由于设置了中文字体，似乎不work
 			Bold:   true,
 			Italic: true,
 		},
 	}
-	logOutput.SetText(`> 注意事项：
-1.请提前1~5分钟验证cookie的有效性
-2.日期格式20xx-xx-xx
-3.预约的场地随机`)
+	logOutput.SetPlaceHolder(`> 注意事项：
+1.日期格式YYYY-MM-DD，例如2023-01-01
+2.请提前1~5分钟验证cookie的有效性。
+3.保证cookie开头和结尾没有回车或空格。`)
 	//logOutput.Disable() // 不希望用户能够修改日志，但暗黑时效果并不好
 	logTitle := canvas.NewText("日志", color.White)
 	logContent := container.NewBorder(logTitle, nil, nil, nil, container.NewPadded(logOutput))
@@ -257,7 +279,7 @@ func main() {
 		if isPass {
 			dialogWindow = dialog.NewInformation("成功", "cookie验证成功", myWindow)
 		} else {
-			dialogWindow = dialog.NewInformation("失败", "cookie失效", myWindow)
+			dialogWindow = dialog.NewInformation("失败", "cookie失效，请重新获取并验证", myWindow)
 		}
 		dialogWindow.Show()
 	})
@@ -266,8 +288,8 @@ func main() {
 	// topContent
 	idInput, idInputContent := generateInputContainer("学号", "请输入10位学号")
 	nameInput, nameInputContent := generateInputContainer("姓名", "请输入姓名")
-	phoneInput, phoneInputContent := generateInputContainer("手机", "请输入校园卡绑定号码")
-	dateInput, dateInputContent := generateInputContainer("预约日期", "格式20xx-xx-xx，例如2020-01-01")
+	phoneInput, phoneInputContent := generateInputContainer("手机号码", "真实手机号")
+	dateInput, dateInputContent := generateInputContainer("预约日期", "YYYY-MM-DD")
 	inputLine1 := container.NewGridWithRows(1, idInputContent, nameInputContent, phoneInputContent)
 	inputLine2 := container.NewGridWithRows(1, sportSelectContent, dateInputContent)
 	topContent := container.NewVBox(inputLine1, inputLine2, cookieContent)
@@ -320,6 +342,12 @@ func main() {
 			dialogWindow.Show()
 
 		} else {
+			if !isValidDateFormat(basicInfo.date) {
+				dialogWindow := dialog.NewInformation("预约失败", "请检查日期格式", myWindow)
+				logOutput.Append(NewTextWithPrefix("预约失败: 日期格式有误"))
+				dialogWindow.Show()
+				return
+			}
 			logOutput.Append(NewTextWithPrefix("基础信息:"))
 			logOutput.Append("\n	学    号: " + basicInfo.id)
 			logOutput.Append("\n	姓    名: " + basicInfo.name)
@@ -330,7 +358,6 @@ func main() {
 			logOutput.Append(NewTextWithPrefix("获取空闲场地"))
 			AddOrderWorker(basicInfo, logOutput)
 		}
-
 	})
 	////停止预约按钮
 	//stopButton := widget.NewButton("停止", func() {
