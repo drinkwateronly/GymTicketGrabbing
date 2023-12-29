@@ -1,3 +1,5 @@
+// 编译可执行文件命令：go build -ldflags "-s -w -H=windowsgui" .
+
 package main
 
 import (
@@ -310,6 +312,7 @@ func main() {
 		"18:00-19:00",
 		"19:00-20:00",
 		"20:00-21:00",
+		"21:00-22:00",
 	}, func(hourRange string) {
 		if hourRange != "" {
 			basicInfo.beginHour = hourRange[0:2]

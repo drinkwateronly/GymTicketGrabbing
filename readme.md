@@ -47,11 +47,11 @@
 
 - 进入开发者模式后，按如下步骤进行。
 
-  ![image-20231222201126688](C:/Users/wallnut/AppData/Roaming/Typora/typora-user-images/image-20231222201126688.png)
+  ![image-20231222201126688](https://raw.githubusercontent.com/drinkwateronly/Image-Host/main/image/image-20231222201126688.png)
 
-  ![image-20231222201244546](C:/Users/wallnut/AppData/Roaming/Typora/typora-user-images/image-20231222201244546.png)
+  ![image-20231222201244546](https://raw.githubusercontent.com/drinkwateronly/Image-Host/main/image/image-20231222201244546.png)
 
-  ![image-20231226191303980](C:/Users/wallnut/AppData/Roaming/Typora/typora-user-images/image-20231226191303980.png)
+  ![image-20231226191303980](https://raw.githubusercontent.com/drinkwateronly/Image-Host/main/image/image-20231226191303980.png)
 
   
 
