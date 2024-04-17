@@ -94,12 +94,14 @@ func GetOpenRooms(cookie, date, beginHour, endHour string) (error, [][]string) {
 	}
 	allField := result["datas"].(map[string]interface{})["getOpeningRoom"].(map[string]interface{})["rows"].([]interface{})
 	// 筛选出空闲场次的WID + 场次名称，保存为string列表openRooms
+	fmt.Println(allField)
 	for i := range allField {
 		field := allField[i].(map[string]interface{})
 		if !field["disabled"].(bool) {
 			openRooms = append(openRooms, []string{field["WID"].(string), field["CDMC"].(string)})
 		}
 	}
+	fmt.Println(openRooms)
 	return nil, openRooms
 }
 
