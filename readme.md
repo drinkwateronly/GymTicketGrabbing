@@ -1,5 +1,8 @@
 # 羽毛球场抢票脚本简单教程
 
+## 使用
+下载本仓库的`./demo.exe/`可执行文件直接运行，或编译运行本仓库`./main.go`代码。
+
 ## 概览
 
 ![image-20231226183355147](https://raw.githubusercontent.com/drinkwateronly/Image-Host/main/image/image-20231226183355147.png)
